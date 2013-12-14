@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HTML5 Canvas Cube</title>
+	<script type="application/javascript">
+		// Rotation matricies
+		/*
+		*        |   1    0    0  |
+		*  R_x = |   0   cos -sin |
+		*        |   0   sin  cos |
+		*
+		*        |  cos   0   sin |
+		*  R_y = |   0    1    0  |
+		*        | -sin   0   cos |
+		*
+		*        |  cos -sin   0  |
+		*  R_z = |  sin  cos   0  |
+		*        |   0    0    1  |
+		*/
+
+		// Some global variables
+		var scale = 1;					// Scaling up the size of it, requires maunally adjusting the canvas size
+		var max_dist = 50;				// Maximum distance a point can go
+		var z_min = scale * 100;
+		var z_max = scale * -100;
+		var x_off = scale * 100;		// Offsets for chaning drawing origin
+		var y_off = scale * 100;		// See above
+		var z_rise = 0.15
+		var z_run = 0.5;
+		var z_min_clr= 0x00;
+		var z_max_clr = 0xFF;
+		var z_mid_clr = Math.floor((z_max_clr - z_min_clr) / 2 + z_min_clr);
+		var z1;
+		var z2;
+		var i;
+		var delay;
+
+		// For the cube
+		var p = new Array(8);	// Points
+		var p_p	= new Array(8);	// Points (prime)
+
+		// 3D point class (a.k.a. a vector)
+		// x -- int
+		// y -- int
+		// z -- int
+		// Returns: 3D point object
+		function p3d(x, y, z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+
+		// Convience function for RGB colors
+		// r -- int [0,255]
+		// g -- int [0,255]
+		// b -- int [0,255]
+		// Returns: Javascript RGB color string
+		function rgb(r, g, b) {
+			return 'rgb(' + r + ',' + g + ',' + b + ')';
+		}
+
+		// Remaps a number in one range to another
+		// val -- num
+		// from1 -- num (lower bound 1)
+		// to1 -- num (upper bound 1)
+		// from2 -- num (lower bound 2)
+		// to2 -- num (upper bound 2)
+		// Returns: a Number remapped to the new range
+		function remap(val, from1, to1, from2, to2) {
+			return (val - from1) / (to1 - from1) * (to2 - from2) + from2;
+		}
+
+		// Takes a 3D point and turns it's floats into integers
+		// point -- 3D point object
+		// Returns -- 3D point object
+		function round_point(point) {
+			point.x = Math.round(point.x);
+			point.y = Math.round(point.y);
+			point.z = Math.round(point.z);
+
+			return point;
+		}
+
+		// Rotates a point about the X axis
+		// point -- 3D point object
+		// theta -- num (in radians)
+		// Returns: 3D point
+		function rotate_x(point, theta) {
+			var new_point = new p3d(point.x, point.y, point.z);
+
+			new_point.x = point.x;
+			new_point.y = (point.y * Math.cos(theta)) - (point.z * Math.sin(theta));
+			new_point.z = (point.y * Math.sin(theta)) + (point.z * Math.cos(theta));
+
+			return round_point(new_point);
+		}
+
+		// Rotates a point about the Y axis
+		// point -- 3D point object
+		// theta -- num (in radians)
+		// Returns: 3D point
+		function rotate_y(point, theta) {
+			var new_point = new p3d(point.x, point.y, point.z);
+
+			new_point.x = (point.x * Math.cos(theta)) + (point.z * Math.sin(theta));
+			new_point.y = point.y;
+			new_point.z = -(point.x * Math.sin(theta)) + (point.z * Math.cos(theta));
+
+			return round_point(new_point);
+		}
+
+		// Rotates a point about the Z axis
+		// point -- 3D point object
+		// theta -- num (in radians)
+		// Returns: 3D point
+		function rotate_z(point, theta) {
+			var new_point = new p3d(point.x, point.y, point.z);
+
+			new_point.x = (point.x * Math.cos(theta)) - (point.y * Math.sin(theta));
+			new_point.y = (point.x * Math.sin(theta)) + (point.y * Math.cos(theta));
+			new_point.z = point.z;
+
+			return round_point(new_point);
+		}
+
+		// Draw a line in "3D"
+		// ctx -- HTML5 Canvas context
+		// a -- 3D point object
+		// b -- 3D point object
+		function plotLine(ctx, a, b) {
+			var a_p = new p3d(a.x + (z_run * a.z), a.y + (z_rise * a.z), a.z);	// a prime
+			var b_p = new p3d(b.x + (z_run * b.z), b.y + (z_rise * b.z), b.z);	// b prime
+			var grad;
+
+			ctx.beginPath();
+
+			// Use a gradient to figure out how "far," something should be
+			grad = ctx.createLinearGradient(x_off + a_p.x, y_off - a_p.y, x_off + b_p.x, y_off - b_p.y);
+			grad.addColorStop(0, rgb(0x00, Math.floor(remap(a.z, z_min, z_max, z_min_clr, z_max_clr)), 0xFF));
+//			grad.addColorStop(0.5,rgb(0x00, ,0x00);
+			grad.addColorStop(1, rgb(0x00, Math.floor(remap(b.z, z_min, z_max, z_min_clr, z_max_clr)), 0xFF));
+
+			ctx.strokeStyle = grad;
+			ctx.moveTo(x_off + a_p.x, y_off - a_p.y);
+			ctx.lineTo(x_off + b_p.x, y_off - b_p.y);
+
+			ctx.stroke();
+		}
+
+		// Draw the up (and run the update logic
+		function draw() {
+			updateVertices();
+
+			var canvas = document.getElementById('mesh');
+			var ctx = canvas.getContext('2d');
+			ctx.fillStyle = rgb(0, 0, 0);
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+//			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		
+			// Grid
+//			plotLine(ctx, new p3d(-100, 0, 0), new p3d(100, 0, 0));
+//			plotLine(ctx, new p3d(0, -100, 0), new p3d(0, 100, 0));
+//			plotLine(ctx, z1, z2);
+
+			// Cube
+			plotLine(ctx, p_p[0], p_p[1]);
+			plotLine(ctx, p_p[1], p_p[2]);
+			plotLine(ctx, p_p[2], p_p[3]);
+			plotLine(ctx, p_p[3], p_p[0]);
+
+			plotLine(ctx, p_p[4], p_p[5]);
+			plotLine(ctx, p_p[5], p_p[6]);
+			plotLine(ctx, p_p[6], p_p[7]);
+			plotLine(ctx, p_p[7], p_p[4]);
+
+			plotLine(ctx, p_p[0], p_p[4]);
+			plotLine(ctx, p_p[1], p_p[5]);
+			plotLine(ctx, p_p[2], p_p[6]);
+			plotLine(ctx, p_p[3], p_p[7]);
+
+			setTimeout(draw, delay);		// Run again in 10 milliseconds
+		}
+
+		// update the vertices that are being used.
+		function updateVertices() {
+			i++;
+			if (i == 1000)
+				i = 0;
+
+			var deg = 2 * Math.PI * (i / 1000);
+
+			for (var j = 0; j < 8; j++) {
+				p_p[j] = rotate_y(p[j], deg);
+				p_p[j] = rotate_z(p_p[j], deg);
+			}
+		}
+
+		// Set some variables and have it start right away
+		z1 = new p3d(0, 0, scale * -100);
+		z2 = new p3d(0, 0, scale * 100);
+		i = 0;
+
+		// The Cube
+		p[0] = new p3d(scale * -max_dist, scale * max_dist, scale * -max_dist);
+		p[1] = new p3d(scale * max_dist, scale * max_dist, scale * -max_dist);
+		p[2] = new p3d(scale * max_dist, scale * -max_dist, scale * -max_dist);
+		p[3] = new p3d(scale * -max_dist, scale * -max_dist, scale * -max_dist);
+		p[4] = new p3d(scale * -max_dist, scale * max_dist, scale * max_dist);
+		p[5] = new p3d(scale * max_dist, scale * max_dist, scale * max_dist);
+		p[6] = new p3d(scale * max_dist, scale * -max_dist, scale * max_dist);
+		p[7] = new p3d(scale * -max_dist, scale * -max_dist, scale * max_dist);
+	
+		delay = 10;
+		setTimeout(draw, 1);		// Start drawing right away
+	</script>
+</head>
+
+<body>
+	<canvas id="mesh" width="200" height="200"></canvas>
+</body>
+</html>
+
