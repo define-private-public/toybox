@@ -5,7 +5,6 @@ import 'dart:html';
 import 'dart:math';
 import 'dart:async';
 
-
 /*== Global Variables ==*/
 int scale = 1;
 int size = 200;
@@ -17,6 +16,7 @@ int maxDist = 50;
 
 DivElement content = querySelector('#content');
 CanvasElement c = new CanvasElement(width: scale * size, height: scale * size);
+
 List<Vec3> points = new List(8);  // could technically do this with 3
 List<Line> lines = new List(12);
 
@@ -40,6 +40,7 @@ class Vec3 {
   String toString() => '<$x, $y, $z>';
 }
 
+// 3D Line class
 class Line {
   Vec3 a, b;
 
@@ -47,6 +48,7 @@ class Line {
 
   String toString() => '$a ---- $b';
 }
+
 
 
 // For making RGB values
@@ -88,13 +90,14 @@ Vec3 rotateZ(Vec3 vec, double theta) {
   return vecPrime;
 }
 
+// Moves the vector over somewhere
 Vec3 translate(Vec3 vec, Vec3 delta) => new Vec3(vec.x + delta.x, vec.y + delta.y, vec.z + delta.z);
 
 
 
 /*== Drawing Functions ==*/
 void plotLine(CanvasRenderingContext2D ctx, Line line) {
-  // Note: Failed persepctive matrix
+  // NOTE: Failed persepctive matrix
   // Working on a perspective projection; 
   //                          
   //                          Left side is original mathmatical representation:
@@ -150,7 +153,8 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
   Vec3 a, b;
   switch (projectionType) {
     case OBLIQUE:
-      // For an oblique projection, apply it's "projection matrix"; mathmatically, we shouldn't give it the z component, but we need to
+      // For an oblique projection, apply it's "projection matrix";
+      // mathmatically, we shouldn't give it the z component, but we need to
       double theta = PI / 8;
       a = new Vec3(line.a.x + (0.5 * -line.a.z * cos(theta)), line.a.y + (0.5 * -line.a.z * sin(theta)), line.a.z);
       b = new Vec3(line.b.x + (0.5 * -line.b.z * cos(theta)), line.b.y + (0.5 * -line.b.z * sin(theta)), line.b.z);
@@ -181,9 +185,6 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
       b = line.b;
       break;
   }
-
-
-  // Working perspective matrix
 
   // Setup the gradient
   CanvasGradient grad = ctx.createLinearGradient(xOffset + a.x, yOffset - a.y, xOffset + b.x, yOffset - b.y);
@@ -276,10 +277,8 @@ void main() {
     lines[i + 8] = new Line(points[i], points[i + 4]);                  // Sides
   }
 
-
   // Add to the document
   content.append(c);
   drawRoutine();          // Start drawing
 }
-
 
