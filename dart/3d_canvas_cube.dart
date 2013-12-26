@@ -6,7 +6,7 @@ import 'dart:math';
 import 'dart:async';
 
 /*== Global Variables ==*/
-int scale = 4;
+int scale = 1;
 int size = 200;
 int zMin = (scale * (-size / 2)).toInt();
 int zMax = (scale * (size / 2)).toInt();
@@ -27,7 +27,8 @@ const int ISOMETRIC = 2;          // Also kind of orthographic
 const int PERSPECTIVE = 3;        // Not sure if is really a true perspective matrix
 int projectionType = PERSPECTIVE;
 
-boolean renderStero = true;      // To do steroscopic rendering?
+boolean renderStero = false;      // To do steroscopic rendering?
+                                 // If doing so, try setting the scale to 2
 
 
 // 3D Vector class
@@ -188,7 +189,6 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
       break;
   }
 
-  renderStero = true;
   if (renderStero) {
     // Some sort of 3D
     double theta_blue = PI / 180;
@@ -203,8 +203,8 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
     a = new Vec3(a.x + (skew * -a.z * cos(theta_blue)), a.y + (skew * -a.z * sin(theta_blue)), a.z);
     b = new Vec3(b.x + (skew * -b.z * cos(theta_blue)), b.y + (skew * -b.z * sin(theta_blue)), b.z);
     grad = ctx.createLinearGradient(xOffset + a.x, yOffset - a.y, xOffset + b.x, yOffset - b.y);
-    grad..addColorStop(0, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), 0xFF))
-        ..addColorStop(1, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), 0xFF));
+    grad..addColorStop(0, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), remap(a.z, zMin, zMax, 0x00, 0xFF).floor()))
+        ..addColorStop(1, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), remap(a.z, zMin, zMax, 0x00, 0xFF).floor()));
     ctx..beginPath()
        ..lineWidth = scale
        ..strokeStyle = grad
@@ -213,7 +213,7 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
        ..stroke();
 
     // Red
-    a = refA;
+    a = refA;   // Reset them
     b = refB;
     a = new Vec3(a.x + (skew * -a.z * cos(theta_red)), a.y + (skew * -a.z * sin(theta_red)), a.z);
     b = new Vec3(b.x + (skew * -b.z * cos(theta_red)), b.y + (skew * -b.z * sin(theta_red)), b.z);
