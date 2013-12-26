@@ -27,7 +27,7 @@ const int ISOMETRIC = 2;          // Also kind of orthographic
 const int PERSPECTIVE = 3;        // Not sure if is really a true perspective matrix
 int projectionType = PERSPECTIVE;
 
-boolean renderStero = false;      // To do steroscopic rendering?
+boolean renderStereo = false;      // To do stereoscopic rendering?
                                  // If doing so, try setting the scale to 2
 
 
@@ -189,7 +189,7 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
       break;
   }
 
-  if (renderStero) {
+  if (renderStereo) {
     // Some sort of 3D
     double theta_blue = PI / 180;
     double theta_red = PI;
