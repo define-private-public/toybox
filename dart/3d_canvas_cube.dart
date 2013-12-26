@@ -200,8 +200,8 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
     refB = b;
 
     // Blue
-    a = new Vec3(a.x + (skew * -a.z * cos(theta_blue)), a.y + (skew * -a.z * sin(theta_blue)), a.z);
-    b = new Vec3(b.x + (skew * -b.z * cos(theta_blue)), b.y + (skew * -b.z * sin(theta_blue)), b.z);
+    a = new Vec3(a.x + (skew * -a.z * cos(theta_blue)), a.y + (-a.z * sin(theta_blue)), a.z);
+    b = new Vec3(b.x + (skew * -b.z * cos(theta_blue)), b.y + (-b.z * sin(theta_blue)), b.z);
     grad = ctx.createLinearGradient(xOffset + a.x, yOffset - a.y, xOffset + b.x, yOffset - b.y);
     grad..addColorStop(0, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), remap(a.z, zMin, zMax, 0x00, 0xFF).floor()))
         ..addColorStop(1, rgb(0x00, remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), remap(a.z, zMin, zMax, 0x00, 0xFF).floor()));
@@ -215,8 +215,8 @@ void plotLine(CanvasRenderingContext2D ctx, Line line) {
     // Red
     a = refA;   // Reset them
     b = refB;
-    a = new Vec3(a.x + (skew * -a.z * cos(theta_red)), a.y + (skew * -a.z * sin(theta_red)), a.z);
-    b = new Vec3(b.x + (skew * -b.z * cos(theta_red)), b.y + (skew * -b.z * sin(theta_red)), b.z);
+    a = new Vec3(a.x + (skew * -a.z * cos(theta_red)), a.y + (-a.z * sin(theta_red)), a.z);
+    b = new Vec3(b.x + (skew * -b.z * cos(theta_red)), b.y + (-b.z * sin(theta_red)), b.z);
     grad = ctx.createLinearGradient(xOffset + a.x, yOffset - a.y, xOffset + b.x, yOffset - b.y);
     grad..addColorStop(0, rgb(remap(a.z, zMin, zMax, 0x00, 0xFF).floor(), 0x00, 0x00))
         ..addColorStop(1, rgb(remap(b.z, zMin, zMax, 0x00, 0xFF).floor(), 0x00, 0x00));
