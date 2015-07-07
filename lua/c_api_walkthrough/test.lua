@@ -1,13 +1,12 @@
 function foo(str)
-	
-	if (bar == nil) then
-		print("bar() is nil")
-		return
-	end
-
 	local s, len = bar(str)
-	print(s)
-	return len
+
+	local s2, len2 = bar("hamburger")
+
+	local t = {}
+	t[s] = len
+	t[s2] = len2
+	return t
 end
 
 

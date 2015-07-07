@@ -49,13 +49,34 @@ int main() {
 	lua_getglobal(L, "foo");
 	lua_pushstring(L, "cheeseburger");
 	lua_pcall(L, 1, 1, 0);
-	// foo, result
+
+	// table, cheeseburger
+	lua_pushstring(L, "cheeseburger");
+	lua_gettable(L, -2);
+	// table, cheeseburger, len
 	int result = lua_tonumber(L, -1);
 
+	lua_pop(L, 1);
+
+	lua_pushstring(L, "hamburger");
+	lua_gettable(L, -2);
+	int result2 = lua_tonumber(L, -1);
 
 
+	// push to table
+	lua_pop(L, 1);
+	lua_pushstring(L, "test");
+	lua_pushstring(L, "hello");
+	lua_settable(L, -3);
 
-	printf("result is %i\n", result);
+	lua_pushstring(L, "test");
+	lua_gettable(L, -2);
+
+	const char *hello = lua_tostring(L, -1);
+
+
+	printf("result is %i, %i\n", result, result2);
+	printf("test=%s\n", hello);
 
 
 
