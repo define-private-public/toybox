@@ -1,13 +1,13 @@
-print("Hello World!")
+function foo(str)
+	
+	if (bar == nil) then
+		print("bar() is nil")
+		return
+	end
 
-function foo(y)
-	return y*y
+	local s, len = bar(str)
+	print(s)
+	return len
 end
-
-x = 5
-
-
-
-
 
 
