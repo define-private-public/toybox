@@ -6,6 +6,7 @@ import basic3d
 import math
 import tables
 from algorithm import sort
+from colors import colBlueViolet
 
 
 # Custom types
@@ -95,8 +96,12 @@ proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
   grad.addColorStop(1, rgb(0x00, remap(b.z, zMin.float, zMax.float, 0x00.float, 0xFF.float).floor.int, 0xFF))
   
   ctx.beginPath()
-  ctx.lineWidth = scale
+  ctx.lineJoin = RoundJoin
+  ctx.lineCap = RoundCap
+  ctx.lineWidth = 5 * scale
   ctx.strokeStyle = grad
+  ctx.shadowColor = rgb(colBlueViolet)
+  ctx.shadowBlur = 15 * scale
   ctx.moveTo(xOffset.float + a.x, yOffset.float - a.y)
   ctx.lineTo(xOffset.float + b.x, yOffset.float - b.y)
   ctx.stroke()
