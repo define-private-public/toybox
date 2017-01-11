@@ -28,7 +28,7 @@ proc line(a, b: Vector3d): Line =
 
 # Global variables
 var
-  scale = 1.0
+  scale = 3.0
   size = 200.0
   zMin = (scale * (-size / 2)).int
   zMax = (scale * (size / 2)).int
