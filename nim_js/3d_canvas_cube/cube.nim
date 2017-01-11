@@ -73,11 +73,8 @@ proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
     of Perspective:
       let
         near = scale * 100.0
-        far = -near
         right = scale * 125.0
-        left = -right
         top = scale * 125.0
-        bot = -top
       a = vector3d(near / (right - line.a.z) * line.a.x, near / (top - line.a.z) * line.a.y, line.a.z)
       b = vector3d(near / (right - line.b.z) * line.b.x, near / (top - line.b.z) * line.b.y, line.b.z)
 
@@ -142,11 +139,9 @@ proc drawCube(ctx: CanvasRenderingContext2D; edges: seq[Line]) =
   # Draw the lines
   for i in 0..high(sortedLines):
     plotLine(ctx, sortedLines[i])
-#  # Draw the lines
-#  for i in 0..high(edges):
-#    plotLine(ctx, edges[i])
 
 
+## A handy proch to use JS's SetTimout function
 proc setTimeout(function: proc(); ms: float) =
   {.emit: ["setTimeout(", function, ",", ms, ");"].}
 
@@ -169,9 +164,7 @@ proc drawRoutine() =
     edges[j].b &= rotateZ(0.003)
 
   # Recall the function eventually
-#  new Timer(new Duration(milliseconds: 25), drawRoutine);
   setTimeout(drawRoutine, 25)
-
 
 
 dom.window.onload = proc(e: dom.Event) =
@@ -192,3 +185,4 @@ dom.window.onload = proc(e: dom.Event) =
     edges[i + 8] = line(points[i], points[i + 4])                    # Sides
 
   drawRoutine()
+
