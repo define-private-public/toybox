@@ -3,8 +3,12 @@
 import dom
 import html5_canvas
 import basic3d
-import math
-import tables
+from basic3d import
+  vector3d, rotateX, rotateY
+from math import
+  Pi, sin, cos, floor
+from tables import
+  TableRef, newTable, hasKey, keys, add, `[]`, `[]=`
 from sequtils import toSeq
 from algorithm import sort
 from colors import colBlueViolet
@@ -50,7 +54,7 @@ proc remap(value, a, b, x, y: float): float {.inline.} =
 
 
 ## plots a line on the canvas
-proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
+proc plotLine(ctx: CanvasRenderingContext2D; line: Line; drawGlow: bool = false) =
   var a, b: Vector3d
 
   case projectionType:
@@ -85,21 +89,26 @@ proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
       # Todo add something else
       discard
 
-  # Create a gradient for the lines based on their Z positions
-  var grad = ctx.createLinearGradient(xOffset.float + a.x,
-                                      yOffset.float - a.y,
-                                      xOffset.float + b.x,
-                                      yOffset.float - b.y)
-  grad.addColorStop(0, rgb(0x00, remap(a.z, zMin.float, zMax.float, 0x00.float, 0xFF.float).floor.int, 0xFF))
-  grad.addColorStop(1, rgb(0x00, remap(b.z, zMin.float, zMax.float, 0x00.float, 0xFF.float).floor.int, 0xFF))
+  if drawGlow:
+    ctx.strokeStyle = "black"
+    ctx.shadowColor = rgb(colBlueViolet)
+    ctx.shadowBlur = 15 * scale
+  else:
+    # Create a gradient for the lines based on their Z positions
+    var grad = ctx.createLinearGradient(xOffset.float + a.x,
+                                        yOffset.float - a.y,
+                                        xOffset.float + b.x,
+                                        yOffset.float - b.y)
+    grad.addColorStop(0, rgb(0x00, remap(a.z, zMin.float, zMax.float, 0x00.float, 0xFF.float).floor.int, 0xFF))
+    grad.addColorStop(1, rgb(0x00, remap(b.z, zMin.float, zMax.float, 0x00.float, 0xFF.float).floor.int, 0xFF))
+
+    ctx.strokeStyle = grad
+    ctx.shadowBlur = 0
   
   ctx.beginPath()
   ctx.lineJoin = RoundJoin
   ctx.lineCap = RoundCap
   ctx.lineWidth = 5 * scale
-  ctx.strokeStyle = grad
-  ctx.shadowColor = rgb(colBlueViolet)
-  ctx.shadowBlur = 15 * scale
   ctx.moveTo(xOffset.float + a.x, yOffset.float - a.y)
   ctx.lineTo(xOffset.float + b.x, yOffset.float - b.y)
   ctx.stroke()
@@ -136,7 +145,9 @@ proc drawCube(ctx: CanvasRenderingContext2D; edges: seq[Line]) =
       sortedLines[i] = line
       i += 1
 
-  # Draw the lines
+  # Draw the lines (glow first then the actual lines)
+  for i in 0..high(sortedLines):
+    plotLine(ctx, sortedLines[i], true)
   for i in 0..high(sortedLines):
     plotLine(ctx, sortedLines[i])
 
