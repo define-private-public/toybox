@@ -18,6 +18,11 @@ type
     Perspective
 
 
+## intializes a Line object
+proc line(a, b: Vector3d): Line =
+  return Line(a:a, b:b)
+
+
 # Global variables
 var
   scale = 1.0
@@ -26,11 +31,11 @@ var
   zMax = (scale * (size / 2)).int
   xOffset = (scale * (size / 2)).int
   yOffset = (scale * (size / 2)).int
-  maxDist = 50
+  maxDist = 50.0
   canvas: Canvas
 
-  points: seq[Vector3d] = @[]
-  edges: seq[Line] = @[]
+  points = newSeq[Vector3d](8) 
+  edges = newSeq[Line](12)
 
   projectionType = Perspective
 
@@ -155,5 +160,19 @@ proc drawRoutine() =
 
 dom.window.onload = proc(e: dom.Event) =
   canvas = dom.document.getElementById("3d-cube-canvas").Canvas
+
+  points[0] = vector3d(scale * -maxDist, scale * maxDist, scale * maxDist);
+  points[1] = vector3d(scale * maxDist, scale * maxDist, scale * maxDist);
+  points[2] = vector3d(scale * maxDist, scale * -maxDist, scale * maxDist);
+  points[3] = vector3d(scale * -maxDist, scale * -maxDist, scale * maxDist);
+  points[4] = vector3d(scale * -maxDist, scale * maxDist, scale * -maxDist);
+  points[5] = vector3d(scale * maxDist, scale * maxDist, scale * -maxDist);
+  points[6] = vector3d(scale * maxDist, scale * -maxDist, scale * -maxDist);
+  points[7] = vector3d(scale * -maxDist, scale * -maxDist, scale * -maxDist);
+
+  for i in 0..<4:
+    edges[i] = line(points[i], points[(i + 1) mod 4])                # Front
+    edges[i + 4] = line(points[i + 4], points[((i + 1) mod 4) + 4])  # Back
+    edges[i + 8] = line(points[i], points[i + 4])                    # Sides
 
   drawRoutine()
