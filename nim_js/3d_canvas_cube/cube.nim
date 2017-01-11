@@ -1,3 +1,5 @@
+# This was made using Nim v0.16.0 and the `html5_canvas` package
+
 import dom
 import html5_canvas
 import basic3d
@@ -100,7 +102,7 @@ proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
   ctx.stroke()
 
 
-# Draws the cube with the supplied points
+## Draws the cube with the supplied points
 proc drawCube(ctx: CanvasRenderingContext2D; edges: seq[Line]) =
 #  # We need to draw the lines in a different order, so we have to sort them based
 #  # upon their position in the Z axis
@@ -135,6 +137,10 @@ proc drawCube(ctx: CanvasRenderingContext2D; edges: seq[Line]) =
     plotLine(ctx, edges[i])
 
 
+proc setTimeout(function: proc(); ms: float) =
+  {.emit: ["setTimeout(", function, ",", ms, ");"].}
+
+
 # The callback that will loop and draw
 proc drawRoutine() =
   # Draw and stuff
@@ -154,7 +160,7 @@ proc drawRoutine() =
 
   # Recall the function eventually
 #  new Timer(new Duration(milliseconds: 25), drawRoutine);
-
+  setTimeout(drawRoutine, 25)
 
 
 
