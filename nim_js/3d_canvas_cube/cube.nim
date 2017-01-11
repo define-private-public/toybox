@@ -5,6 +5,7 @@ import html5_canvas
 import basic3d
 import math
 import tables
+from sequtils import toSeq
 from algorithm import sort
 from colors import colBlueViolet
 
@@ -109,37 +110,41 @@ proc plotLine(ctx: CanvasRenderingContext2D; line: Line) =
 
 ## Draws the cube with the supplied points
 proc drawCube(ctx: CanvasRenderingContext2D; edges: seq[Line]) =
-#  # We need to draw the lines in a different order, so we have to sort them based
-#  # upon their position in the Z axis
-#  var sortedLines = newSeq[Line](edges.len)
-#
-#  # Sort the lines into a map, based upon location in the Z axis
-#  var zLineMap:TableRef[float, seq[Line]] = newTable()
-#  for line in edges:
-#    # Which Z coordinate is lesser?
-#    double z = min(line.a.z, line.b.z)
-#
-#    # Either put it in a list, or add it to another one
-#    if zLineMap.hasKey(z):
-#      zLineMap[z].add(line)
-#    else:
-#      zLineMap[z] = @[line]
-#
-#  # Put it in the sorted list now
-#  int i = 0;
-#  let zKeys: seq[float] = @[zLineMap.keys]
-#  zKeys.sort(cmp[float])
-#  for key in zKeys:
-#    for line in zLineMap[key]:
-#      sortedLines[i] = line
-#      i += 1
-#
-#  # Draw the lines
-#  for i in 0..high(sortedLines):
-#    plotLine(ctx, sortedLines[i])
+  # We need to draw the lines in a different order, so we have to sort them based
+  # upon their position in the Z axis
+  var sortedLines = newSeq[Line](edges.len)
+
+  # Sort the lines into a map, based upon location in the Z axis
+  var zLineMap:TableRef[float, seq[Line]] = newTable[float, seq[Line]]()
+  for line in edges:
+    # Which Z coordinate is lesser?
+    let z = min(line.a.z, line.b.z)
+
+    # Either put it in a list, or add it to another one
+    if zLineMap.hasKey(z):
+      var s: seq[Line] = zLineMap[z]
+      s.add(line)
+      zLineMap[z] = s
+    else:
+      zLineMap[z] = @[line]
+
+  # Put it in the sorted list now
+  var zKeys: seq[float] = toSeq(zLineMap.keys)
+  zKeys.sort(cmp[float])
+
+  # Sort them
+  var i = 0
+  for key in zKeys:
+    for line in zLineMap[key]:
+      sortedLines[i] = line
+      i += 1
+
   # Draw the lines
-  for i in 0..high(edges):
-    plotLine(ctx, edges[i])
+  for i in 0..high(sortedLines):
+    plotLine(ctx, sortedLines[i])
+#  # Draw the lines
+#  for i in 0..high(edges):
+#    plotLine(ctx, edges[i])
 
 
 proc setTimeout(function: proc(); ms: float) =
